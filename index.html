@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Notiva</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  --surface: rgba(255,255,255,.86);
+  --surface-solid: #ffffff;
+  --input: rgba(255,255,255,.92);
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: rgba(226,232,240,.9);
+  --shadow: 0 10px 30px rgba(0,0,0,.08);
+  --shadow-big: 0 25px 60px rgba(0,0,0,.18);
+  --radius: 18px;
+  --blur: blur(14px);
+}
+
+.dark-mode {
+  --bg: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+  --surface: rgba(15,23,42,.88);
+  --surface-solid: #0f172a;
+  --input: #1e293b;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --border: rgba(51,65,85,.9);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --shadow-big: 0 25px 60px rgba(0,0,0,.55);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 12px 8px;
+  overflow-x: hidden;
+}
+
+#app {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  padding-bottom: 90px;
+}
+
+.app-header {
+  position: sticky;
+  top: 8px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--shadow);
+}
+
+.header-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  width: 100%;
+}
+
+.header-left { display: flex; align-items: center; gap: 10px; width: 100%; }
+.logo { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.logo-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: rgba(37,99,235,.12); }
+.logo-text { font-size: 1.1rem; font-weight: 800; letter-spacing: -.04em; }
+
+.header-actions { display: flex; align-items: center; gap: 6px; }
+.header-btn { width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 50%; background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; position: relative; }
+.header-btn:hover { background: rgba(125,125,125,.12); transform: translateY(-1px); }
+
+.user-btn { position: relative; }
+.user-status { position: absolute; width: 8px; height: 8px; right: 2px; bottom: 2px; border-radius: 50%; background: #94a3b8; border: 2px solid var(--surface-solid); }
+.user-status.online { background: var(--success); }
+
+.trash-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--danger);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 10px;
+  border: 2px solid var(--surface-solid);
+}
+
+.search-box { width: 100%; display: flex; align-items: center; gap: 8px; }
+.search-box input { flex: 1; }
+
+.tags-filter-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px 2px 2px 2px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.tags-filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .2s ease;
+}
+.filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+.filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+input, textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 11px 13px;
+  outline: none;
+  font-family: inherit;
+  font-size: .86rem;
+}
+input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+textarea { resize: none; }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+
+.section-title { margin: 12px 3px 7px; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+
+.notes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; align-items: stretch; }
+
+.note {
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: var(--blur);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.note:hover { transform: translateY(-2px); border-color: var(--primary); }
+
+.note[data-bg="default"], #note-screen[data-bg="default"] { background: var(--surface-solid); }
+.note[data-bg="blue"], #note-screen[data-bg="blue"] { background: rgba(59,130,246,.13); }
+.note[data-bg="green"], #note-screen[data-bg="green"] { background: rgba(16,185,129,.13); }
+.note[data-bg="amber"], #note-screen[data-bg="amber"] { background: rgba(245,158,11,.13); }
+.note[data-bg="rose"], #note-screen[data-bg="rose"] { background: rgba(244,63,94,.13); }
+.note[data-bg="purple"], #note-screen[data-bg="purple"] { background: rgba(168,85,247,.13); }
+.note[data-bg="lined"], #note-screen[data-bg="lined"] {
+  background-color: var(--surface-solid);
+  background-image: linear-gradient(90deg, transparent 0px, transparent 100%), linear-gradient(var(--border) 1px, transparent 1px);
+  background-size: 100% 24px;
+}
+.note[data-bg="grid"], #note-screen[data-bg="grid"] {
+  background-color: var(--surface-solid);
+  background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.note-header { display: flex; justify-content: space-between; align-items: center; gap: 4px; margin-bottom: 2px; }
+.note-date { font-size: .62rem; color: var(--muted); font-weight: 600; }
+.note-actions { display: flex; gap: 4px; align-items: center; }
+.icon-btn { border: none; background: transparent; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.icon-btn:hover { background: rgba(125,125,125,.15); }
+.pin-btn.pinned { transform: rotate(-25deg); filter: drop-shadow(0 0 2px var(--primary)); }
+
+.delete-btn {
+  transform: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.note-title { font-size: .86rem; font-weight: 700; margin: 0 0 -2px 0; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-content { color: var(--muted); font-size: .74rem; line-height: 1.15; margin: 0; padding: 0; white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.note-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: auto; padding-top: 5px; }
+.tag { padding: 2px 6px; border-radius: 20px; background: rgba(37,99,235,.1); color: var(--primary); font-size: .58rem; font-weight: 700; cursor: pointer; }
+.tag:hover { background: var(--primary); color: white; }
+
+.empty-state { grid-column: 1 / -1; text-align: center; padding: 65px 20px; color: var(--muted); }
+.empty-icon { font-size: 42px; margin-bottom: 10px; }
+.empty-state h3 { font-size: .95rem; color: var(--text); margin-bottom: 5px; }
+.empty-state p { font-size: .78rem; }
+
+#add-note-btn {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 58px;
+  height: 58px;
+  border: none;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(37,99,235,.35);
+  z-index: 150;
+}
+#add-note-btn:hover { transform: scale(1.07); }
+
+#note-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  max-width: 700px;
+  margin: auto;
+  padding: 10px 14px;
+  background: var(--surface-solid);
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.action-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 8px; }
+.action-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font-family: inherit; font-weight: 700; cursor: pointer; font-size: .68rem; }
+.save-btn { background: var(--primary); color: white; border: none; }
+
+#note-title-input { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+#note-content-input { min-height: 240px; flex: 1; line-height: 1.6; }
+.form-label { margin: 8px 0 4px; color: var(--muted); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+
+.bg-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+.bg-opt { padding: 5px 10px; border-radius: 8px; cursor: pointer; border: 2px solid var(--border); font-size: .7rem; font-weight: 600; background: var(--surface-solid); color: var(--text); }
+.bg-opt.selected { border-color: var(--primary); background: rgba(37,99,235,.1); color: var(--primary); }
+
+body.zen-mode .app-header,
+body.zen-mode #add-note-btn,
+body.zen-mode .action-header .action-btn:not(#zen-btn),
+body.zen-mode #save-btn,
+body.zen-mode .form-label,
+body.zen-mode .bg-picker,
+body.zen-mode #note-tags,
+body.zen-mode #note-reminder,
+body.zen-mode #global-trash-bar {
+  display: none !important;
+}
+
+body.zen-mode #note-screen { padding: 12px 16px; }
+body.zen-mode .action-header { position: absolute; top: 8px; right: 12px; margin: 0; z-index: 600; }
+body.zen-mode #zen-btn { display: block !important; padding: 3px 8px; font-size: 0.62rem; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); backdrop-filter: var(--blur); }
+body.zen-mode #note-title-input { font-size: 1.5rem; border: none; background: transparent; margin-top: 25px; box-shadow: none; }
+body.zen-mode #note-content-input { font-size: 1.1rem; border: none; background: transparent; min-height: 80vh; line-height: 1.8; box-shadow: none; }
+
+#toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--text);
+  color: var(--surface-solid);
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-size: .8rem;
+  font-weight: 600;
+  z-index: 99999;
+  box-shadow: var(--shadow-big);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast-action { color: var(--primary); cursor: pointer; text-decoration: underline; font-weight: 700; }
+
+.notiva-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 18px; }
+.notiva-modal.hidden { display: none !important; }
+.notiva-overlay { position: absolute; inset: 0; background: rgba(2,6,23,.68); backdrop-filter: blur(9px); }
+.notiva-card { position: relative; z-index: 2; width: 100%; max-width: 390px; padding: 27px 22px 22px; border: 1px solid var(--border); border-radius: 24px; background: var(--surface-solid); color: var(--text); box-shadow: var(--shadow-big); text-align: center; }
+.notiva-close { position: absolute; right: 11px; top: 11px; width: 34px; height: 34px; border: none; border-radius: 50%; background: rgba(125,125,125,.12); color: var(--muted); font-size: 23px; cursor: pointer; }
+.notiva-icon { width: 68px; height: 68px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; border-radius: 20px; font-size: 32px; background: rgba(37,99,235,.12); }
+.notiva-card.success .notiva-icon { background: rgba(16,185,129,.13); }
+.notiva-card.warning .notiva-icon { background: rgba(245,158,11,.14); }
+.notiva-card.error .notiva-icon { background: rgba(239,68,68,.13); }
+.notiva-card h2 { font-size: 1.12rem; margin-bottom: 8px; }
+.notiva-card p { color: var(--muted); font-size: .84rem; line-height: 1.55; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 9px; }
+.modal-btn { flex: 1; min-height: 44px; border: none; border-radius: 12px; font-family: inherit; font-weight: 700; cursor: pointer; }
+.modal-primary { background: var(--primary); color: white; }
+.modal-secondary { background: rgba(125,125,125,.13); color: var(--text); }
+
+.auth-tabs { display: flex; gap: 5px; background: rgba(125,125,125,.1); padding: 4px; border-radius: 12px; margin-bottom: 16px; }
+.auth-tab { flex: 1; border: none; background: transparent; color: var(--muted); padding: 9px; border-radius: 9px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: .75rem; }
+.auth-tab.active { background: var(--surface-solid); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.auth-form { text-align: left; }
+.auth-form input { margin-bottom: 9px; }
+.auth-submit { width: 100%; min-height: 45px; margin-top: 6px; border: none; border-radius: 12px; background: var(--primary); color: white; font-family: inherit; font-weight: 700; cursor: pointer; }
+
+.user-info { display: flex; align-items: center; gap: 10px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 14px; background: rgba(125,125,125,.06); }
+.user-avatar { width: 42px; height: 42px; border-radius: 50%; background: rgba(37,99,235,.13); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.user-email { flex: 1; min-width: 0; }
+.user-email strong { display: block; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; }
+.user-email span { display: block; color: var(--success); font-size: .67rem; margin-top: 2px; }
+.logout-btn { width: 100%; min-height: 43px; border: none; border-radius: 12px; background: rgba(239,68,68,.1); color: var(--danger); font-family: inherit; font-weight: 700; cursor: pointer; }
+
+.loading { position: fixed; inset: 0; z-index: 10000; background: rgba(2,6,23,.65); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+.loading.hidden { display: none !important; }
+.loading-card { padding: 24px; border-radius: 20px; background: var(--surface-solid); color: var(--text); text-align: center; box-shadow: var(--shadow-big); }
+.spinner { width: 35px; height: 35px; border: 4px solid rgba(125,125,125,.2); border-top-color: var(--primary); border-radius: 50%; margin: 0 auto 12px; animation: spin .8s linear infinite; }
+
+.hidden { display: none !important; }
+
+.trash-batch-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(37,99,235,.1); padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 0.75rem; font-weight: 700; color: var(--primary); }
+.trash-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--danger); }
+.note-select-container { display: flex; align-items: center; gap: 6px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+
+<body>
+
+<div id="app">
+  <header class="app-header">
+    <div class="header-main-row">
+      <div id="header-normal" class="header-left">
+        <div class="logo" id="logo-home">
+          <div class="logo-icon">📝</div>
+          <div class="logo-text" id="app-title-text">Notiva</div>
+        </div>
+      </div>
+
+      <div id="header-search" class="search-box hidden">
+        <input id="search-input" type="text" placeholder="Buscar notas o #etiquetas...">
+        <button id="close-search" class="header-btn">✕</button>
+      </div>
+
+      <div id="header-actions" class="header-actions">
+        <button id="account-btn" class="header-btn user-btn" title="Mi cuenta">
+          👤
+          <span id="user-status" class="user-status"></span>
+        </button>
+        <button id="search-btn" class="header-btn" title="Buscar">🔍</button>
+        <button id="header-trash-btn" class="header-btn" title="Papelera">
+          <span id="header-trash-icon">🗑️</span>
+          <span id="trash-count-badge" class="trash-badge hidden">0</span>
+        </button>
+        <button id="theme-btn" class="header-btn" title="Cambiar tema">🌙</button>
+      </div>
+    </div>
+
+    <div id="tags-filter-bar" class="tags-filter-bar"></div>
+  </header>
+
+  <div id="global-trash-bar"></div>
+
+  <section id="pinned-section" class="hidden">
+    <div class="section-title">📌 Fijadas</div>
+    <div id="pinned-container" class="notes-grid"></div>
+  </section>
+
+  <section>
+    <div id="others-title" class="section-title">
+      <span id="others-title-text">Otras notas</span>
+    </div>
+    <div id="notes-container" class="notes-grid"></div>
+  </section>
+</div>
+
+<button id="add-note-btn" title="Nueva nota">＋</button>
+
+<div id="note-screen">
+  <div class="action-header">
+    <button id="back-btn" class="action-btn">← Volver</button>
+    <div style="display:flex; gap:6px;">
+      <button id="zen-btn" class="action-btn" title="Modo Enfoque">🧘 Zen</button>
+      <button id="save-btn" class="action-btn save-btn">💾 Guardar</button>
+    </div>
+  </div>
+
+  <input id="note-title-input" type="text" placeholder="Título de la nota">
+  <textarea id="note-content-input" placeholder="Escribe tu nota aquí..."></textarea>
+
+  <div class="form-label">Estilo / Fondo (Textura)</div>
+  <div class="bg-picker">
+    <div class="bg-opt selected" data-bg="default">Sólido</div>
+    <div class="bg-opt" data-bg="blue">Azul</div>
+    <div class="bg-opt" data-bg="green">Verde</div>
+    <div class="bg-opt" data-bg="amber">Ámbar</div>
+    <div class="bg-opt" data-bg="rose">Rosa</div>
+    <div class="bg-opt" data-bg="purple">Púrpura</div>
+    <div class="bg-opt" data-bg="lined">📄 Rayado</div>
+    <div class="bg-opt" data-bg="grid">📐 Cuadrícula</div>
+  </div>
+
+  <div class="form-label">Etiquetas</div>
+  <input id="note-tags" type="text" placeholder="trabajo, ideas, personal">
+
+  <div class="form-label">Recordatorio</div>
+  <input id="note-reminder" type="datetime-local">
+</div>
+
+<div id="toast">
+  <span id="toast-msg">Nota movida a papelera</span>
+  <span id="toast-action">Deshacer</span>
+</div>
+
+<div id="notiva-modal" class="notiva-modal hidden">
+  <div id="notiva-overlay" class="notiva-overlay"></div>
+  <div id="notiva-card" class="notiva-card">
+    <button id="notiva-close" class="notiva-close">×</button>
+    <div id="notiva-icon" class="notiva-icon">☁️</div>
+    <h2 id="notiva-title">Notiva</h2>
+    <p id="notiva-message">Mensaje</p>
+    <div id="notiva-actions" class="modal-actions">
+      <button id="notiva-cancel" class="modal-btn modal-secondary">Cancelar</button>
+      <button id="notiva-confirm" class="modal-btn modal-primary">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<div id="account-modal" class="notiva-modal hidden">
+  <div id="account-overlay" class="notiva-overlay"></div>
+  <div class="notiva-card">
+    <button id="account-close" class="notiva-close">×</button>
+    <div class="notiva-icon">👤</div>
+    <h2>Notiva Cloud</h2>
+
+    <div id="logged-user" class="hidden">
+      <div class="user-info">
+        <div class="user-avatar">☁️</div>
+        <div class="user-email">
+          <strong id="logged-email">usuario</strong>
+          <span>● Conectado a Notiva Cloud</span>
+        </div>
+      </div>
+      <button id="logout-btn" class="logout-btn">Cerrar sesión</button>
+    </div>
+
+    <div id="auth-area">
+      <div class="auth-tabs">
+        <button id="login-tab" class="auth-tab active">Iniciar sesión</button>
+        <button id="register-tab" class="auth-tab">Crear cuenta</button>
+      </div>
+      <div class="auth-form">
+        <input id="auth-email" type="email" placeholder="Correo electrónico" autocomplete="email">
+        <input id="auth-password" type="password" placeholder="Contraseña" autocomplete="current-password">
+        <button id="auth-submit" class="auth-submit">Iniciar sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loading" class="loading hidden">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <strong id="loading-text">Procesando...</strong>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCVQGLBW28JEvv5spNq7qSpg7k9eF2cO2Q",
+  authDomain: "notiva-b342a.firebaseapp.com",
+  projectId: "notiva-b342a",
+  storageBucket: "notiva-b342a.firebasestorage.app",
+  messagingSenderId: "396956830780",
+  appId: "1:396956830780:web:6038a3b0390e54e7654739"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const LOCAL_KEY = "notiva_notes";
+const LOCAL_TRASH_KEY = "notiva_trash";
+
+let cloudNotes = [];
+let localNotes = [];
+let notes = [];
+
+let cloudTrash = [];
+let localTrash = [];
+let trashNotes = [];
+
+let editId = null;
+let selectedBg = "default";
+let currentUser = null;
+let unsubscribeNotes = null;
+let unsubscribeTrash = null;
+let authMode = "login";
+let modalConfirmAction = null;
+let modalCancelAction = null;
+let activeTagFilter = "";
+let currentView = "notes";
+let isZenMode = false;
+let lastDeletedNote = null;
+let toastTimeout = null;
+
+let isTrashSelecting = false;
+let selectedTrashIds = new Set();
+let activeQuickMenuId = null;
+
+const mainScreen = document.getElementById("app");
+const noteScreen = document.getElementById("note-screen");
+const addNoteBtn = document.getElementById("add-note-btn");
+const backBtn = document.getElementById("back-btn");
+const saveBtn = document.getElementById("save-btn");
+const zenBtn = document.getElementById("zen-btn");
+const noteTitleInput = document.getElementById("note-title-input");
+const noteContentInput = document.getElementById("note-content-input");
+const noteTags = document.getElementById("note-tags");
+const noteReminder = document.getElementById("note-reminder");
+const notesContainer = document.getElementById("notes-container");
+const pinnedContainer = document.getElementById("pinned-container");
+const pinnedSection = document.getElementById("pinned-section");
+const othersTitleText = document.getElementById("others-title-text");
+const tagsFilterbarEl = document.getElementById("tags-filter-bar");
+const headerTrashBtn = document.getElementById("header-trash-btn");
+const headerTrashIcon = document.getElementById("header-trash-icon");
+const trashCountBadge = document.getElementById("trash-count-badge");
+const logoHome = document.getElementById("logo-home");
+const globalTrashBar = document.getElementById("global-trash-bar");
+
+const searchBtn = document.getElementById("search-btn");
+const closeSearch = document.getElementById("close-search");
+const searchInput = document.getElementById("search-input");
+const headerNormal = document.getElementById("header-normal");
+const headerSearch = document.getElementById("header-search");
+const headerActions = document.getElementById("header-actions");
+const themeBtn = document.getElementById("theme-btn");
+
+const accountBtn = document.getElementById("account-btn");
+const accountModal = document.getElementById("account-modal");
+const accountClose = document.getElementById("account-close");
+const accountOverlay = document.getElementById("account-overlay");
+const loginTab = document.getElementById("login-tab");
+const registerTab = document.getElementById("register-tab");
+const authEmail = document.getElementById("auth-email");
+const authPassword = document.getElementById("auth-password");
+const authSubmit = document.getElementById("auth-submit");
+const authArea = document.getElementById("auth-area");
+const loggedUser = document.getElementById("logged-user");
+const loggedEmail = document.getElementById("logged-email");
+const logoutBtn = document.getElementById("logout-btn");
+const userStatus = document.getElementById("user-status");
+
+const notivaModal = document.getElementById("notiva-modal");
+const notivaCard = document.getElementById("notiva-card");
+const notivaOverlay = document.getElementById("notiva-overlay");
+const notivaClose = document.getElementById("notiva-close");
+const notivaIcon = document.getElementById("notiva-icon");
+const notivaTitle = document.getElementById("notiva-title");
+const notivaMessage = document.getElementById("notiva-message");
+const notivaCancel = document.getElementById("notiva-cancel");
+const notivaConfirm = document.getElementById("notiva-confirm");
+
+const loading = document.getElementById("loading");
+const loadingText = document.getElementById("loading-text");
+const toast = document.getElementById("toast");
+const toastAction = document.getElementById("toast-action");
+
+function showLoading(text = "Procesando...") {
+  loadingText.textContent = text;
+  loading.classList.remove("hidden");
+}
+
+function hideLoading() {
+  loading.classList.add("hidden");
+}
+
+function showToast(message) {
+  document.getElementById("toast-msg").textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+    lastDeletedNote = null;
+  }, 4500);
+}
+
+toastAction.addEventListener("click", async () => {
+  if (lastDeletedNote) {
+    await restoreNote(lastDeletedNote.id, true);
+    toast.classList.remove("show");
+    lastDeletedNote = null;
+  }
+});
+
+function escapeHTML(str) {
+  return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function combineNotes() {
+  if (currentUser) {
+    const cloudIds = new Set(cloudNotes.map(n => n.id));
+    const uniqueLocals = localNotes.filter(n => !cloudIds.has(n.id));
+    notes = [...cloudNotes, ...uniqueLocals];
+
+    const cloudTrashIds = new Set(cloudTrash.map(n => n.id));
+    const uniqueLocalTrash = localTrash.filter(n => !cloudTrashIds.has(n.id));
+    trashNotes = [...cloudTrash, ...uniqueLocalTrash];
+  } else {
+    notes = [...localNotes];
+    trashNotes = [...localTrash];
+  }
+
+  notes.sort((a, b) => {
+    const timeA = a.dateTimestamp && typeof a.dateTimestamp.toDate === "function" ? a.dateTimestamp.toDate().getTime() : new Date(a.dateTimestamp || 0).getTime();
+    const timeB = b.dateTimestamp && typeof b.dateTimestamp.toDate === "function" ? b.dateTimestamp.toDate().getTime() : new Date(b.dateTimestamp || 0).getTime();
+    return timeB - timeA;
+  });
+
+  trashNotes.sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+  updateTrashBadge();
+}
+
+function updateTrashBadge() {
+  const count = trashNotes.length;
+  if (currentView === "trash") {
+    headerTrashIcon.textContent = "⬅️";
+    headerTrashBtn.title = "Volver a notas";
+    trashCountBadge.classList.add("hidden");
+  } else {
+    headerTrashIcon.textContent = "🗑️";
+    headerTrashBtn.title = "Papelera";
+    if (count > 0) {
+      trashCountBadge.textContent = count;
+      trashCountBadge.classList.remove("hidden");
+    } else {
+      trashCountBadge.classList.add("hidden");
+    }
+  }
+}
+
+function saveLocalNotes() { localStorage.setItem(LOCAL_KEY, JSON.stringify(localNotes)); }
+function saveLocalTrash() { localStorage.setItem(LOCAL_TRASH_KEY, JSON.stringify(localTrash)); }
+
+function loadLocalData() {
+  try {
+    const data = localStorage.getItem(LOCAL_KEY);
+    const trashData = localStorage.getItem(LOCAL_TRASH_KEY);
+    if (data) localNotes = JSON.parse(data) || [];
+    if (trashData) localTrash = JSON.parse(trashData) || [];
+    combineNotes();
+  } catch (e) {
+    localNotes = [];
+    localTrash = [];
+    combineNotes();
+  }
+}
+
+function updateTagChips() {
+  const allTagsSet = new Set();
+  notes.forEach(n => {
+    if (Array.isArray(n.tags)) {
+      n.tags.forEach(t => { if(t) allTagsSet.add(t.trim()); });
+    }
+  });
+
+  const tags = Array.from(allTagsSet);
+  tagsFilterbarHTML(tags);
+}
+
+function tagsFilterbarHTML(tags) {
+  tagsFilterbarEl.classList.remove("hidden");
+  let html = `<button class="filter-chip ${activeTagFilter === "" ? "active" : ""}" data-tag="">Todas</button>`;
+  tags.forEach(t => {
+    html += `<button class="filter-chip ${activeTagFilter === t ? "active" : ""}" data-tag="${escapeHTML(t)}">#${escapeHTML(t)}</button>`;
+  });
+  tagsFilterbarEl.innerHTML = html;
+
+  tagsFilterbarEl.querySelectorAll(".filter-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      activeTagFilter = chip.dataset.tag;
+      updateTagChips();
+      renderNotes();
+    });
+  });
+}
+
+function showNotivaModal({ icon = "☁️", title = "Notiva", message = "", type = "default", confirmText = "Aceptar", cancelText = "Cancelar", showCancel = true, onConfirm = null, onCancel = null }) {
+  notivaIcon.textContent = icon;
+  notivaTitle.textContent = title;
+  notivaMessage.innerHTML = message;
+  notivaConfirm.textContent = confirmText;
+  notivaCancel.textContent = cancelText;
+  notivaCard.classList.remove("success", "warning", "error");
+  if (type !== "default") notivaCard.classList.add(type);
+  notivaCancel.style.display = showCancel ? "block" : "none";
+  modalConfirmAction = onConfirm;
+  modalCancelAction = onCancel;
+  notivaModal.classList.remove("hidden");
+}
+
+function closeNotivaModal() {
+  notivaModal.classList.add("hidden");
+  modalConfirmAction = null;
+  modalCancelAction = null;
+}
+
+notivaConfirm.addEventListener("click", async () => {
+  const action = modalConfirmAction;
+  closeNotivaModal();
+  if (action) await action();
+});
+
+notivaCancel.addEventListener("click", () => {
+  const action = modalCancelAction;
+  closeNotivaModal();
+  if (action) action();
+});
+
+notivaClose.addEventListener("click", closeNotivaModal);
+notivaOverlay.addEventListener("click", closeNotivaModal);
+
+function success(title, message) { showNotivaModal({ icon: "✅", title, message, type: "success", showCancel: false, confirmText: "Continuar" }); }
+function errorMessage(title, message) { showNotivaModal({ icon: "❌", title, message, type: "error", showCancel: false, confirmText: "Entendido" }); }
+function warning(title, message) { showNotivaModal({ icon: "⚠️", title, message, type: "warning", showCancel: false, confirmText: "Entendido" }); }
+
+function formatDate(value) {
+  if (!value) return "Ahora";
+  let date = value && typeof value.toDate === "function" ? value.toDate() : new Date(value);
+  if (!date || isNaN(date.getTime())) return "Ahora";
+  return date.toLocaleDateString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function getTrashCountdown(deletedAt) {
+  if (!deletedAt) return "Expira en 30 días";
+  let date = deletedAt && typeof deletedAt.toDate === "function" ? deletedAt.toDate() : new Date(deletedAt);
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  const expiresAt = date.getTime() + thirtyDays;
+  const timeLeft = expiresAt - Date.now();
+  const daysLeft = Math.ceil(timeLeft / (1000 * 60 * 60 * 24));
+  if (daysLeft <= 0) return "Expira pronto";
+  if (daysLeft === 1) return "Expira en 1 día";
+  return `Expira en ${daysLeft} días`;
+}
+
+function formatDateTimeLocal(value) {
+  if (!value) return "";
+  let date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+  const pad = n => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+async function uploadLocalNoteToCloud(noteId) {
+  if (!currentUser) {
+    accountModal.classList.remove("hidden");
+    return;
+  }
+  const noteToUpload = localNotes.find(n => n.id === noteId);
+  if (!noteToUpload) return;
+
+  showLoading("Subiendo a la nube...");
+  try {
+    const notesRef = collection(db, "users", currentUser.uid, "notes");
+    await addDoc(notesRef, {
+      title: noteToUpload.title || "",
+      content: noteToUpload.content || "",
+      tags: noteToUpload.tags || [],
+      reminder: noteToUpload.reminder || "",
+      bg: noteToUpload.bg || "default",
+      pinned: noteToUpload.pinned || false,
+      dateTimestamp: serverTimestamp()
+    });
+    localNotes = localNotes.filter(n => n.id !== noteId);
+    saveLocalNotes();
+    combineNotes();
+    updateTagChips();
+    renderNotes();
+    hideLoading();
+    success("Subido", "Tu nota se ha guardado en la nube correctamente.");
+  } catch (e) {
+    hideLoading();
+    errorMessage("Error", "No se pudo subir la nota a la nube.");
+  }
+}
+
+function createNoteCard(note) {
+  const element = document.createElement("div");
+  element.className = "note";
+  element.dataset.bg = note.bg || "default";
+  const hasReminder = note.reminder && new Date(note.reminder).getTime() > Date.now();
+  const tags = Array.isArray(note.tags) ? note.tags : [];
+  const isLocalOnly = localNotes.some(n => n.id === note.id);
+
+  if (currentView === "trash") {
+    const isChecked = selectedTrashIds.has(note.id);
+    element.innerHTML = `
+      <div class="note-header">
+        <div class="note-select-container">
+          ${isTrashSelecting ? `<input type="checkbox" class="trash-checkbox" ${isChecked ? "checked" : ""}>` : ""}
+          <span class="note-date">${escapeHTML(getTrashCountdown(note.deletedAt))}</span>
+        </div>
+        <div class="note-actions">
+          <button class="icon-btn restore-btn" title="Restaurar nota">♻️</button>
+        </div>
+      </div>
+      <div class="note-title">${escapeHTML(note.title)}</div>
+      <div class="note-content">${escapeHTML(note.content)}</div>
+    `;
+
+    let longPressTimer;
+    let isLongPressTriggered = false;
+
+    const handlePressStart = () => {
+      isLongPressTriggered = false;
+      longPressTimer = setTimeout(() => {
+        isLongPressTriggered = true;
+        if (!isTrashSelecting) {
+          isTrashSelecting = true;
+          selectedTrashIds.clear();
+        }
+        if (selectedTrashIds.has(note.id)) {
+          selectedTrashIds.delete(note.id);
+        } else {
+          selectedTrashIds.add(note.id);
+        }
+        renderNotes();
+      }, 600);
+    };
+
+    const handlePressEnd = () => clearTimeout(longPressTimer);
+
+    element.addEventListener("mousedown", handlePressStart);
+    element.addEventListener("mouseup", handlePressEnd);
+    element.addEventListener("mouseleave", handlePressEnd);
+    element.addEventListener("touchstart", handlePressStart);
+    element.addEventListener("touchend", handlePressEnd);
+
+    element.addEventListener("click", e => {
+      if (isLongPressTriggered) {
+        e.stopPropagation();
+        return;
+      }
+      if (isTrashSelecting) {
+        if (selectedTrashIds.has(note.id)) {
+          selectedTrashIds.delete(note.id);
+        } else {
+          selectedTrashIds.add(note.id);
+        }
+        renderNotes();
+      }
+    });
+
+    if (isTrashSelecting) {
+      const checkbox = element.querySelector(".trash-checkbox");
+      if (checkbox) {
+        checkbox.addEventListener("click", e => {
+          e.stopPropagation();
+          if (checkbox.checked) selectedTrashIds.add(note.id);
+          else selectedTrashIds.delete(note.id);
+          renderNotes();
+        });
+      }
+    }
+
+    element.querySelector(".restore-btn").addEventListener("click", e => { e.stopPropagation(); restoreNote(note.id); });
+  } else {
+    const isQuickMenuOpen = activeQuickMenuId === note.id;
+
+    if (isQuickMenuOpen) {
+      element.innerHTML = `
+        <div class="note-header" style="justify-content: flex-end; width:100%;">
+          <div class="note-actions">
+            <button class="icon-btn quick-pin-btn ${note.pinned ? "pinned" : ""}" title="${note.pinned ? "Desfijar" : "Fijar"}">📌</button>
+            <button class="icon-btn quick-delete-btn delete-btn" title="Mover a papelera">🗑️</button>
+          </div>
+        </div>
+        <div class="note-title" style="margin-top: auto; margin-bottom: auto; text-align: center;">Acciones rápidas</div>
+      `;
+
+      element.querySelector(".quick-pin-btn").addEventListener("click", e => {
+        e.stopPropagation();
+        activeQuickMenuId = null;
+        togglePin(note.id, !note.pinned);
+      });
+      element.querySelector(".quick-delete-btn").addEventListener("click", e => {
+        e.stopPropagation();
+        activeQuickMenuId = null;
+        moveToTrash(note.id);
+      });
+
+      element.addEventListener("click", e => {
+        e.stopPropagation();
+        activeQuickMenuId = null;
+        renderNotes();
+      });
+
+    } else {
+      element.innerHTML = `
+        <div class="note-header">
+          <span class="note-date">${escapeHTML(formatDate(note.dateTimestamp))}</span>
+          <div class="note-actions">
+            ${isLocalOnly ? `<button class="icon-btn upload-local-btn" title="Guardar en la nube">💾</button>` : ""}
+            ${hasReminder ? `<span title="Recordatorio">⏰</span>` : ""}
+            ${note.pinned ? `<span title="Fijada" style="font-size: 12px;">📌</span>` : ""}
+          </div>
+        </div>
+        <div class="note-title">${escapeHTML(note.title)}</div>
+        <div class="note-content">${escapeHTML(note.content)}</div>
+        ${tags.length ? `<div class="note-tags">${tags.map(t => `<span class="tag" data-tag="${escapeHTML(t)}">#${escapeHTML(t)}</span>`).join("")}</div>` : ""}
+      `;
+
+      if (isLocalOnly) {
+        element.querySelector(".upload-local-btn").addEventListener("click", e => {
+          e.stopPropagation();
+          uploadLocalNoteToCloud(note.id);
+        });
+      }
+
+      element.querySelectorAll(".tag").forEach(tagEl => {
+        tagEl.addEventListener("click", e => {
+          e.stopPropagation();
+          activeTagFilter = tagEl.dataset.tag;
+          updateTagChips();
+          renderNotes();
+        });
+      });
+
+      element.addEventListener("click", () => editNote(note.id));
+    }
+
+    let pressTimer;
+    const startPress = () => {
+      pressTimer = setTimeout(() => {
+        activeQuickMenuId = note.id;
+        renderNotes();
+      }, 600);
+    };
+    const cancelPress = () => clearTimeout(pressTimer);
+
+    element.addEventListener("mousedown", startPress);
+    element.addEventListener("mouseup", cancelPress);
+    element.addEventListener("mouseleave", cancelPress);
+    element.addEventListener("touchstart", startPress);
+    element.addEventListener("touchend", cancelPress);
+  }
+
+  return element;
+}
+
+function renderNotes() {
+  const search = searchInput.value.trim().toLowerCase();
+  updateTagChips();
+  updateTrashBadge();
+  
+  if (currentView === "trash") {
+    pinnedSection.classList.add("hidden");
+    othersTitleText.textContent = `Papelera (${trashNotes.length})`;
+
+    if (isTrashSelecting) {
+      globalTrashBar.innerHTML = `
+        <div class="trash-batch-bar" style="width:100%;">
+          <span>Seleccionadas: ${selectedTrashIds.size}</span>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn" id="select-all-trash">Todas</button>
+            <button class="action-btn save-btn" id="delete-selected-trash">Eliminar</button>
+            <button class="action-btn" id="cancel-selection">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.getElementById("select-all-trash").addEventListener("click", () => {
+        trashNotes.forEach(n => selectedTrashIds.add(n.id));
+        renderNotes();
+      });
+      document.getElementById("delete-selected-trash").addEventListener("click", () => {
+        if (selectedTrashIds.size === 0) return;
+        confirmBatchPermanentDelete();
+      });
+      document.getElementById("cancel-selection").addEventListener("click", () => {
+        isTrashSelecting = false;
+        selectedTrashIds.clear();
+        renderNotes();
+      });
+    } else {
+      globalTrashBar.innerHTML = "";
+    }
+
+    const filteredTrash = trashNotes.filter(n => 
+      String(n.title || "").toLowerCase().includes(search) ||
+      String(n.content || "").toLowerCase().includes(search)
+    );
+
+    notesContainer.innerHTML = "";
+    if (!filteredTrash.length) {
+      notesContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🗑️</div>
+          <h3>La papelera está vacía</h3>
+          <p>Las notas eliminadas se guardan aquí durante 30 días.</p>
+        </div>
+      `;
+      return;
+    }
+    filteredTrash.forEach(n => notesContainer.appendChild(createNoteCard(n)));
+    return;
+  }
+
+  globalTrashBar.innerHTML = "";
+  othersTitleText.textContent = "Otras notas";
+
+  const activeList = notes;
+  const filtered = activeList.filter(n => {
+    const matchesSearch = !search || 
+      String(n.title || "").toLowerCase().includes(search) ||
+      String(n.content || "").toLowerCase().includes(search) ||
+      (n.tags || []).some(t => String(t).toLowerCase().includes(search));
+
+    const matchesTag = !activeTagFilter || (n.tags || []).some(t => t.toLowerCase() === activeTagFilter.toLowerCase());
+
+    return matchesSearch && matchesTag;
+  });
+
+  notesContainer.innerHTML = "";
+  pinnedContainer.innerHTML = "";
+
+  if (!filtered.length) {
+    pinnedSection.classList.add("hidden");
+    notesContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${activeList.length ? "🔍" : "📒"}</div>
+        <h3>${activeList.length ? "Sin resultados" : "No tienes notas aún"}</h3>
+        <p>${activeList.length ? "Prueba con otra búsqueda o filtro." : "Pulsa + para crear tu primera nota."}</p>
+      </div>
+    `;
+    return;
+  }
+
+  const pinned = filtered.filter(n => n.pinned);
+  const others = filtered.filter(n => !n.pinned);
+
+  if (pinned.length) {
+    pinnedSection.classList.remove("hidden");
+    pinned.forEach(n => pinnedContainer.appendChild(createNoteCard(n)));
+  } else {
+    pinnedSection.classList.add("hidden");
+  }
+
+  if (others.length) {
+    others.forEach(n => notesContainer.appendChild(createNoteCard(n)));
+  }
+}
+
+const bgOptions = document.querySelectorAll(".bg-opt");
+function setBackground(bg) {
+  selectedBg = bg || "default";
+  bgOptions.forEach(opt => {
+    opt.classList.toggle("selected", opt.dataset.bg === selectedBg);
+  });
+  noteScreen.dataset.bg = selectedBg;
+}
+
+bgOptions.forEach(opt => {
+  opt.addEventListener("click", () => setBackground(opt.dataset.bg));
+});
+
+function newNote() {
+  editId = null;
+  noteTitleInput.value = "";
+  noteContentInput.value = "";
+  noteTags.value = "";
+  noteReminder.value = "";
+  setBackground("default");
+  disableZenMode();
+  noteScreen.style.display = "flex";
+  mainScreen.style.display = "none";
+  noteTitleInput.focus();
+}
+
+function editNote(id) {
+  const note = notes.find(item => item.id === id);
+  if (!note) return;
+  editId = id;
+  noteTitleInput.value = note.title || "";
+  noteContentInput.value = note.content || "";
+  noteTags.value = (note.tags || []).join(", ");
+  noteReminder.value = formatDateTimeLocal(note.reminder);
+  setBackground(note.bg || "default");
+  disableZenMode();
+  noteScreen.style.display = "flex";
+  mainScreen.style.display = "none";
+  noteTitleInput.focus();
+}
+
+async function saveNote() {
+  const title = noteTitleInput.value.trim();
+  const content = noteContentInput.value.trim();
+  if (!title || !content) {
+    warning("Nota incompleta", "Escribe un título y contenido.");
+    return;
+  }
+  const tags = noteTags.value.split(",").map(t => t.trim()).filter(Boolean);
+  const reminder = noteReminder.value;
+
+  showLoading(currentUser ? "Guardando..." : "Guardando localmente...");
+
+  try {
+    if (!currentUser) {
+      const localNote = {
+        id: editId || crypto.randomUUID(),
+        title, content, tags, reminder,
+        bg: selectedBg,
+        pinned: editId ? (localNotes.find(n => n.id === editId)?.pinned || false) : false,
+        dateTimestamp: editId ? (localNotes.find(n => n.id === editId)?.dateTimestamp || Date.now()) : Date.now()
+      };
+      if (editId) {
+        const index = localNotes.findIndex(n => n.id === editId);
+        if (index !== -1) localNotes[index] = localNote;
+      } else {
+        localNotes.unshift(localNote);
+      }
+      saveLocalNotes();
+      combineNotes();
+      updateTagChips();
+      renderNotes();
+      hideLoading();
+      goBack();
+      return;
+    }
+
+    const isLocalEdit = localNotes.some(n => n.id === editId);
+    const data = {
+      title, content, tags, reminder,
+      bg: selectedBg,
+      pinned: editId ? (notes.find(n => n.id === editId)?.pinned || false) : false,
+      dateTimestamp: serverTimestamp()
+    };
+
+    const notesRef = collection(db, "users", currentUser.uid, "notes");
+    if (editId && !isLocalEdit) {
+      await updateDoc(doc(db, "users", currentUser.uid, "notes", editId), data);
+    } else {
+      if (editId && isLocalEdit) {
+        localNotes = localNotes.filter(n => n.id !== editId);
+        saveLocalNotes();
+      }
+      await addDoc(notesRef, data);
+    }
+    hideLoading();
+    goBack();
+  } catch (e) {
+    hideLoading();
+    errorMessage("Error", "No se pudo guardar la nota.");
+  }
+}
+
+async function moveToTrash(id) {
+  const targetNote = notes.find(n => n.id === id);
+  if (!targetNote) return;
+
+  showLoading("Enviando a papelera...");
+  try {
+    const isLocalTarget = localNotes.some(n => n.id === id);
+    
+    if (currentUser && !isLocalTarget) {
+      try {
+        await deleteDoc(doc(db, "users", currentUser.uid, "notes", id));
+      } catch (err) {}
+    }
+    
+    localNotes = localNotes.filter(n => n.id !== id);
+    saveLocalNotes();
+
+    const trashItem = { ...targetNote, deletedAt: Date.now() };
+
+    if (currentUser) {
+      try {
+        const trashDocId = String(targetNote.id);
+        await setDoc(doc(db, "users", currentUser.uid, "trash", trashDocId), trashItem);
+      } catch (err) {}
+    }
+
+    localTrash.unshift(trashItem);
+    saveLocalTrash();
+
+    lastDeletedNote = trashItem;
+    combineNotes();
+    updateTagChips();
+    renderNotes();
+    hideLoading();
+    showToast("Nota movida a papelera");
+  } catch (e) {
+    hideLoading();
+    errorMessage("Error", "No se pudo mover a la papelera.");
+  }
+}
+
+async function restoreNote(id, isUndo = false) {
+  const targetNote = trashNotes.find(n => n.id === id);
+  if (!targetNote) return;
+
+  if (!isUndo) showLoading("Restaurando...");
+
+  try {
+    if (currentUser) {
+      try {
+        await deleteDoc(doc(db, "users", currentUser.uid, "trash", String(id)));
+      } catch(err) {}
+
+      const restoredData = {
+        title: targetNote.title || "",
+        content: targetNote.content || "",
+        tags: targetNote.tags || [],
+        reminder: targetNote.reminder || "",
+        bg: targetNote.bg || "default",
+        pinned: targetNote.pinned || false,
+        dateTimestamp: serverTimestamp()
+      };
+      await addDoc(collection(db, "users", currentUser.uid, "notes"), restoredData);
+    }
+    
+    localTrash = localTrash.filter(n => n.id !== id);
+    cloudTrash = cloudTrash.filter(n => n.id !== id);
+    saveLocalTrash();
+
+    if (!currentUser) {
+      localNotes.unshift({ ...targetNote, deletedAt: undefined });
+      saveLocalNotes();
+    }
+
+    combineNotes();
+    updateTagChips();
+    renderNotes();
+    if (!isUndo) {
+      hideLoading();
+      success("Restaurada", "La nota ha vuelto a tu libreta.");
+    }
+  } catch (e) {
+    if (!isUndo) hideLoading();
+    errorMessage("Error", "No se pudo restaurar la nota.");
+  }
+}
+
+function confirmBatchPermanentDelete() {
+  showNotivaModal({
+    icon: "🗑️",
+    title: "Borrar seleccionadas",
+    message: `¿Deseas borrar definitivamente las ${selectedTrashIds.size} notas seleccionadas?`,
+    type: "error",
+    confirmText: "Borrar todas",
+    showCancel: true,
+    onConfirm: async () => {
+      showLoading("Eliminando...");
+      try {
+        const idsToDelete = Array.from(selectedTrashIds);
+        for (const id of idsToDelete) {
+          const isLocalTarget = localTrash.some(n => n.id === id);
+          if (currentUser && !isLocalTarget) {
+            try {
+              await deleteDoc(doc(db, "users", currentUser.uid, "trash", String(id)));
+            } catch(err) {}
+          }
+          localTrash = localTrash.filter(n => n.id !== id);
+          cloudTrash = cloudTrash.filter(n => n.id !== id);
+        }
+        saveLocalTrash();
+        isTrashSelecting = false;
+        selectedTrashIds.clear();
+        combineNotes();
+        renderNotes();
+        hideLoading();
+      } catch (e) {
+        hideLoading();
+        errorMessage("Error", "No se pudieron eliminar las notas.");
+      }
+    }
+  });
+}
+
+async function togglePin(id, pinned) {
+  try {
+    const isLocalTarget = localNotes.some(n => n.id === id);
+    if (currentUser && !isLocalTarget) {
+      await updateDoc(doc(db, "users", currentUser.uid, "notes", id), { pinned });
+    } else {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.pinned = pinned;
+        const localNote = localNotes.find(n => n.id === id);
+        if (localNote) { 
+          localNote.pinned = pinned; 
+          saveLocalNotes(); 
+        }
+      }
+    }
+    combineNotes();
+    renderNotes();
+  } catch (e) {
+    errorMessage("Error", "No se pudo actualizar.");
+  }
+}
+
+function toggleZenMode() {
+  isZenMode = !isZenMode;
+  document.body.classList.toggle("zen-mode", isZenMode);
+  zenBtn.textContent = isZenMode ? "Salir Zen" : "🧘 Zen";
+}
+
+function disableZenMode() {
+  isZenMode = false;
+  document.body.classList.remove("zen-mode");
+  zenBtn.textContent = "🧘 Zen";
+}
+
+function goBack() {
+  disableZenMode();
+  noteScreen.style.display = "none";
+  mainScreen.style.display = "block";
+  editId = null;
+}
+
+let dark = localStorage.getItem("notiva_dark") === "true";
+function updateTheme() {
+  document.body.classList.toggle("dark-mode", dark);
+  themeBtn.textContent = dark ? "☀️" : "🌙";
+}
+updateTheme();
+
+themeBtn.addEventListener("click", () => {
+  dark = !dark;
+  localStorage.setItem("notiva_dark", dark);
+  updateTheme();
+});
+
+searchBtn.addEventListener("click", () => {
+  headerNormal.classList.add("hidden");
+  headerActions.classList.add("hidden");
+  headerSearch.classList.remove("hidden");
+  searchInput.focus();
+});
+
+closeSearch.addEventListener("click", () => {
+  searchInput.value = "";
+  renderNotes();
+  headerSearch.classList.add("hidden");
+  headerNormal.classList.remove("hidden");
+  headerActions.classList.remove("hidden");
+});
+
+searchInput.addEventListener("input", () => renderNotes());
+
+logoHome.addEventListener("click", () => {
+  currentView = "notes";
+  activeTagFilter = "";
+  searchInput.value = "";
+  isTrashSelecting = false;
+  selectedTrashIds.clear();
+  activeQuickMenuId = null;
+  renderNotes();
+});
+
+headerTrashBtn.addEventListener("click", () => {
+  currentView = currentView === "trash" ? "notes" : "trash";
+  activeTagFilter = "";
+  isTrashSelecting = false;
+  selectedTrashIds.clear();
+  activeQuickMenuId = null;
+  renderNotes();
+});
+
+accountBtn.addEventListener("click", () => accountModal.classList.remove("hidden"));
+accountClose.addEventListener("click", () => accountModal.classList.add("hidden"));
+accountOverlay.addEventListener("click", () => accountModal.classList.add("hidden"));
+
+loginTab.addEventListener("click", () => {
+  authMode = "login";
+  loginTab.classList.add("active");
+  registerTab.classList.remove("active");
+  authSubmit.textContent = "Iniciar sesión";
+});
+
+registerTab.addEventListener("click", () => {
+  authMode = "register";
+  registerTab.classList.add("active");
+  loginTab.classList.remove("active");
+  authSubmit.textContent = "Crear cuenta";
+});
+
+authSubmit.addEventListener("click", async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  if (!email || !password) { warning("Incompleto", "Rellena los campos."); return; }
+  showLoading(authMode === "login" ? "Entrando..." : "Registrando...");
+  try {
+    if (authMode === "login") {
+      await signInWithEmailAndPassword(auth, email, password);
+    } else {
+      await createUserWithEmailAndPassword(auth, email, password);
+    }
+    authEmail.value = "";
+    authPassword.value = "";
+    hideLoading();
+    accountModal.classList.add("hidden");
+  } catch (e) {
+    hideLoading();
+    errorMessage("Error", "Credenciales incorrectas o error de red.");
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    accountModal.classList.add("hidden");
+  } catch (e) {
+    errorMessage("Error", "No se pudo cerrar sesión.");
+  }
+});
+
+function startCloudListeners() {
+  if (!currentUser) return;
+  if (unsubscribeNotes) unsubscribeNotes();
+  if (unsubscribeTrash) unsubscribeTrash();
+
+  const notesRef = collection(db, "users", currentUser.uid, "notes");
+  unsubscribeNotes = onSnapshot(query(notesRef, orderBy("dateTimestamp", "desc")), async snapshot => {
+    cloudNotes = snapshot.docs.map(item => {
+      const data = item.data();
+      return {
+        id: item.id,
+        title: data.title || "",
+        content: data.content || "",
+        tags: data.tags || [],
+        reminder: data.reminder || "",
+        bg: data.bg || "default",
+        pinned: data.pinned || false,
+        dateTimestamp: data.dateTimestamp || Date.now()
+      };
+    });
+
+    if (localNotes.length > 0) {
+      const cloudTitles = new Set(cloudNotes.map(n => n.title + n.content));
+      const unsyncedNotes = localNotes.filter(n => !cloudTitles.has(n.title + n.content));
+
+      if (unsyncedNotes.length > 0) {
+        try {
+          await Promise.all(unsyncedNotes.map(note => {
+            const noteData = {
+              title: note.title || "",
+              content: note.content || "",
+              tags: note.tags || [],
+              reminder: note.reminder || "",
+              bg: note.bg || "default",
+              pinned: note.pinned || false,
+              dateTimestamp: serverTimestamp()
+            };
+            return addDoc(notesRef, noteData);
+          }));
+          localNotes = [];
+          saveLocalNotes();
+        } catch (err) {}
+      } else {
+        localNotes = [];
+        saveLocalNotes();
+      }
+    }
+
+    combineNotes();
+    updateTagChips();
+    renderNotes();
+  }, err => {});
+
+  const trashRef = collection(db, "users", currentUser.uid, "trash");
+  unsubscribeTrash = onSnapshot(trashRef, snapshot => {
+    cloudTrash = snapshot.docs.map(item => {
+      const data = item.data();
+      return {
+        id: item.id,
+        title: data.title || "",
+        content: data.content || "",
+        tags: data.tags || [],
+        reminder: data.reminder || "",
+        bg: data.bg || "default",
+        pinned: data.pinned || false,
+        deletedAt: data.deletedAt || Date.now()
+      };
+    });
+    combineNotes();
+    renderNotes();
+  }, err => {});
+}
+
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  if (user) {
+    userStatus.classList.add("online");
+    accountBtn.title = "Cuenta conectada";
+    authArea.classList.add("hidden");
+    loggedUser.classList.remove("hidden");
+    loggedEmail.textContent = user.email;
+    loadLocalData();
+    startCloudListeners();
+  } else {
+    userStatus.classList.remove("online");
+    accountBtn.title = "Iniciar sesión";
+    authArea.classList.remove("hidden");
+    loggedUser.classList.add("hidden");
+    cloudNotes = [];
+    cloudTrash = [];
+    if (unsubscribeNotes) { unsubscribeNotes(); unsubscribeNotes = null; }
+    if (unsubscribeTrash) { unsubscribeTrash(); unsubscribeTrash = null; }
+    loadLocalData();
+    updateTagChips();
+    renderNotes();
+  }
+});
+
+addNoteBtn.addEventListener("click", newNote);
+saveBtn.addEventListener("click", saveNote);
+zenBtn.addEventListener("click", toggleZenMode);
+backBtn.addEventListener("click", goBack);
+
+loadLocalData();
+updateTagChips();
+renderNotes();
+</script>
+
+</body>
+</html>
